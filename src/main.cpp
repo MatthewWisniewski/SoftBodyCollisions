@@ -83,6 +83,12 @@ int main()
                     window.close();
                     return 0;
                 }
+                case sf::Event::KeyPressed:
+                {
+                    if (event.key.code == sf::Keyboard::P) {
+                        keepGoing = !keepGoing;
+                    }
+                }
                 case sf::Event::MouseButtonPressed:
                 {
                     sf::CircleShape *shape = new sf::CircleShape(50);
@@ -94,14 +100,11 @@ int main()
                 }
             }
         }
-        //TODO: Make this one activate once per key press
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-            keepGoing = !keepGoing;
-        }
+        //TODO:Make this collision work properly
         if (keepGoing) {
             ball.applyGravity(sf::Vector2f(0, 9.8));
             ball.applyTimeStep(0.1);
-            if (ball.position.y + ball.render.getRadius() > HEIGHT) {
+            if (ball.position.y + ball.render.getRadius() >= HEIGHT) {
                 ball.velocity.y *= -0.9;
             }
         }
