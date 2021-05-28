@@ -17,6 +17,7 @@ public:
     void setPosition(float x, float y);
     void setVelocity(float x, float y);
     void setUnbalancedForce(float x, float y);
+    void addForce(sf::Vector2f newForce);
 
     void applyGravity(sf::Vector2f g);
 };
