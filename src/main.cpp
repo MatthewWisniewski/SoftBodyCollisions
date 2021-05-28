@@ -1,57 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include "ball.h"
 
 const int WIDTH = 640;
 const int HEIGHT = 480;
-
-class Ball {
-    public:
-        sf::Vector2f position;
-        sf::Vector2f velocity;
-        sf::Vector2f unbalancedForce;
-
-        float mass;
-
-        sf::CircleShape render;
-
-        void applyTimeStep(float deltaTime);
-
-        void setMass(float mass);
-        void setPosition(float x, float y);
-        void setVelocity(float x, float y);
-        void setUnbalancedForce(float x, float y);
-
-        void applyGravity(sf::Vector2f g);
-};
-
-void Ball :: setPosition(float x, float y) {
-    position = sf::Vector2f(x, y);
-    render.setPosition(position);
-}
-
-void Ball :: setVelocity(float x, float y) {
-    velocity = sf::Vector2f(x, y);
-}
-
-void Ball ::setUnbalancedForce(float x, float y) {
-    unbalancedForce = sf::Vector2f(x, y);
-}
-
-void Ball :: applyGravity(sf::Vector2f g) {
-    unbalancedForce += mass * g;
-}
-
-void Ball :: setMass(float mass) {
-    this->mass = mass;
-}
-
-void Ball :: applyTimeStep(float deltaTime) {
-    sf::Vector2f acceleration = unbalancedForce / mass;
-    velocity += acceleration * deltaTime;
-    position += velocity * deltaTime;
-    render.setPosition(position);
-    setUnbalancedForce(0,0);
-}
 
 int main()
 {
@@ -111,10 +63,10 @@ int main()
 
         window.clear();
 
-        for(auto it=shapes.begin();it!=shapes.end();it++)
-        {
-            window.draw(**it);
-        }
+//        for(auto it=shapes.begin();it!=shapes.end();it++)
+//        {
+//            window.draw(**it);
+//        }
         window.draw(ball.render);
         window.display();
     }
