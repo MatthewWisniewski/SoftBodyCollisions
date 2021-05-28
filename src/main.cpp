@@ -32,15 +32,15 @@ DampedSpring::DampedSpring(Ball *a, Ball *b, float restLength, float springConst
 }
 
 void DampedSpring::applyForces() {
-    float absDistance = sqrt(pow(a->position.x-b->position.x, 2) + pow(a->position.y-b->position.y, 2));
+    float absDistance = sqrt(pow(a->position.x - b->position.x, 2) + pow(a->position.y - b->position.y, 2));
 
     float drivingForce = springConstant * (absDistance - restLength);
     float dampingForce = dampingFactor * dotProduct(((b->position - a->position) / absDistance), (b->velocity - a->velocity));
 
     float totalForce = drivingForce + dampingForce;
 
-    a->addForce(totalForce / absDistance * (b->position-a->position));
-    b->addForce(totalForce/absDistance * (a->position-b->position));
+    a->addForce(totalForce / absDistance * (b->position - a->position));
+    b->addForce(totalForce/absDistance * (a->position - b->position));
 }
 
 
