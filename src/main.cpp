@@ -15,6 +15,14 @@ bool inCircle(float radius, sf::Vector2f origin, sf::Vector2f point) {
     return pow((origin.x-point.x), 2) + pow((origin.y - point.y), 2) <= radius*radius;
 }
 
+bool areBallsOverlapping(Ball *a, Ball*b) {
+    return pow((a->position.x - b->position.x),2) + pow((a->position.y - b->position.y), 2) <= pow((a->render.getRadius() + b->render.getRadius()), 2);
+}
+
+float dProduct(sf::Vector2f a, sf::Vector2f b) {
+    return a.x*b.x + a.y*b.y;
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "WORK IN PROGRESS");
@@ -107,6 +115,34 @@ int main()
             }
             if (selected == &ball2) {
                 selected->position = mousePosition;
+            }
+            if (areBallsOverlapping(&ball1, &ball2)) {
+                //Static Collision
+                float dist = sqrt(pow((ball1.position.x - ball2.position.x), 2) + pow((ball1.position.y - ball2.position.y), 2));
+                float halfOverlap = 0.5 * (dist - (ball1.render.getRadius()+ball2.render.getRadius()));
+
+                sf::Vector2f staticCollisionDisplacement = halfOverlap * (ball2.position - ball1.position) / dist;
+                ball1.position += staticCollisionDisplacement;
+                ball2.position -= staticCollisionDisplacement;
+
+                //Dynamic Collision
+                sf::Vector2f normal = (ball2.position-ball1.position) / dist;
+
+                sf::Vector2f tangential = sf::Vector2f(-normal.y, normal.x);
+
+                float ball1TangentialResponse = dProduct(ball1.velocity, tangential);
+                float ball2TangentialResponse = dProduct(ball2.velocity, tangential);
+
+                float ball1NormalResponse = dProduct(ball1.velocity, normal);
+                float ball2NormalResponse = dProduct(ball2.velocity, normal);
+
+                //1D conservation of momentum (elastic collision)
+                float totalMass = ball1.mass + ball2.mass;
+                float m1 = (ball1NormalResponse * (ball1.mass - ball2.mass) + 2.0f * ball2.mass * ball2NormalResponse) / totalMass;
+                float m2 = (ball2NormalResponse * (ball2.mass - ball1.mass) + 2.0f * ball1.mass * ball1NormalResponse) / totalMass;
+
+                ball1.velocity = ball1TangentialResponse * tangential + normal * m1;
+                ball2.velocity = ball2TangentialResponse * tangential + normal * m2;
             }
         }
 
