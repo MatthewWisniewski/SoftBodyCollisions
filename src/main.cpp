@@ -10,8 +10,8 @@
 const int WIDTH = 640;
 const int HEIGHT = 480;
 
-
-void HandleDynamicCollision(Ball *a, Ball *b);
+void handleStaticCollision(Ball *a, Ball *b);
+void handleDynamicCollision(Ball *a, Ball *b);
 
 bool inCircle(float radius, sf::Vector2f origin, sf::Vector2f point) {
     return pow((origin.x-point.x), 2) + pow((origin.y - point.y), 2) <= radius*radius;
@@ -44,7 +44,7 @@ int main()
     balls[1]->render = sf::CircleShape(50);
     balls[1]->render.setOrigin(balls[1]->render.getRadius(), balls[1]->render.getRadius());
 
-    balls[1]->setMass(3);
+    balls[1]->setMass(1);
 
     balls[1]->setPosition(400, 300);
     balls[1]->setVelocity(0, 0);
@@ -81,10 +81,11 @@ int main()
                 }
                 case sf::Event::MouseButtonPressed:
                 {
-                    if (inCircle(balls[0]->render.getRadius(), balls[0]->position, mousePosition)) {
-                        selected = balls[0];
-                    } else if (inCircle(balls[1]->render.getRadius(), balls[1]->position, mousePosition)) {
-                        selected = balls[1];
+                    for (int i = 0; i < balls.size(); i++) {
+                        if (inCircle(balls[i]->render.getRadius(), balls[i]->position, mousePosition)) {
+                            selected = balls[i];
+                            break;
+                        }
                     }
                     if (selected != nullptr) {
                         selected->render.setFillColor(sf::Color::Blue);
@@ -105,37 +106,30 @@ int main()
 
         if (keepGoing) {
             spring.applyForces();
-            balls[0]->applyGravity(sf::Vector2f(0, 9.8));
-            balls[1]->applyGravity(sf::Vector2f(0, 9.8));
-            balls[0]->applyTimeStep(0.1);
-            if (balls[0]->position.y + balls[0]->render.getRadius() >= HEIGHT) {
-                balls[0]->velocity.y *= -0.9;
+            for (int i = 0; i < balls.size(); i++) {
+                balls[i]->applyGravity(sf::Vector2f(0, 9.8));
+                balls[i]->applyTimeStep(0.1);
+                if (balls[i]->position.y + balls[i]->render.getRadius() >= HEIGHT) {
+                    balls[i]->velocity.y *= -0.9;
+                }
+                if (selected == balls[i]) {
+                    selected->position = mousePosition;
+                }
             }
-            if (selected == balls[0]) {
-                selected->position = mousePosition;
+            //Static Collisions
+            for (int i = 0; i < balls.size(); i++) {
+                for (int j = i+1; j < balls.size(); j++) {
+                    if (areBallsOverlapping(balls[i], balls[j])) {
+                        handleStaticCollision(balls[i], balls[j]);
+                        collidingPairs.push_back(std::make_pair(balls[i], balls[j]));
+                    }
+                }
             }
-            balls[1]->applyTimeStep(0.1);
-            if (balls[1]->position.y + balls[1]->render.getRadius() >= HEIGHT) {
-                balls[1]->velocity.y *= -0.9;
-            }
-            if (selected == balls[1]) {
-                selected->position = mousePosition;
-            }
-            if (areBallsOverlapping(balls[0], balls[1])) {
-                //Static Collision
-                float dist = sqrt(
-                        pow((balls[0]->position.x - balls[1]->position.x), 2) + pow((balls[0]->position.y - balls[1]->position.y), 2));
-                float halfOverlap = 0.5 * (dist - (balls[0]->render.getRadius() + balls[1]->render.getRadius()));
-
-                sf::Vector2f staticCollisionDisplacement = halfOverlap * (balls[1]->position - balls[0]->position) / dist;
-                balls[0]->position += staticCollisionDisplacement;
-                balls[1]->position -= staticCollisionDisplacement;
-                collidingPairs.push_back(std::make_pair(balls[0], balls[1]));
-            }
+            //Dynamic Collisions
             for (std::pair <Ball*, Ball*> collidingBalls : collidingPairs) {
                 Ball *a = collidingBalls.first;
                 Ball *b = collidingBalls.second;
-                HandleDynamicCollision(a, b);
+                handleDynamicCollision(a, b);
 
             }
         }
@@ -155,10 +149,19 @@ int main()
     return 0;
 }
 
-void HandleDynamicCollision(Ball *a, Ball *b) {
+void handleStaticCollision(Ball *a, Ball *b) {
+    float dist = sqrt(
+            pow((a->position.x - b->position.x), 2) + pow((a->position.y - b->position.y), 2));
+    float halfOverlap = 0.5 * (dist - (a->render.getRadius() + b->render.getRadius()));
+
+    sf::Vector2f staticCollisionDisplacement = halfOverlap * (b->position - a->position) / dist;
+    a->position += staticCollisionDisplacement;
+    b->position -= staticCollisionDisplacement;
+}
+
+void handleDynamicCollision(Ball *a, Ball *b) {
     float dist = sqrt(pow((a->position.x - b->position.x), 2) + pow((a->position.y - b->position.y), 2));
 
-    //Dynamic Collision
     sf::Vector2f normal = (b->position-a->position) / dist;
 
     sf::Vector2f tangential = sf::Vector2f(-normal.y, normal.x);
