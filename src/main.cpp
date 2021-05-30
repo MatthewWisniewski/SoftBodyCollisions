@@ -11,6 +11,8 @@ const int WIDTH = 640;
 const int HEIGHT = 480;
 
 
+void HandleDynamicCollision(Ball *a, Ball *b);
+
 bool inCircle(float radius, sf::Vector2f origin, sf::Vector2f point) {
     return pow((origin.x-point.x), 2) + pow((origin.y - point.y), 2) <= radius*radius;
 }
@@ -41,7 +43,7 @@ int main()
     ball2.render = sf::CircleShape(50);
     ball2.render.setOrigin(ball2.render.getRadius(), ball2.render.getRadius());
 
-    ball2.setMass(1);
+    ball2.setMass(3);
 
     ball2.setPosition(400, 300);
     ball2.setVelocity(0, 0);
@@ -49,7 +51,7 @@ int main()
 
     DampedSpring spring(&ball1, &ball2, 150, 0.1, 0.05);
 
-    std::vector<sf::Shape*> shapes;
+    std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
 
     bool keepGoing = false;
 
@@ -97,7 +99,9 @@ int main()
                 }
             }
         }
-        //TODO:Make this collision work properly
+
+        collidingPairs.clear();
+
         if (keepGoing) {
             spring.applyForces();
             ball1.applyGravity(sf::Vector2f(0, 9.8));
@@ -118,31 +122,20 @@ int main()
             }
             if (areBallsOverlapping(&ball1, &ball2)) {
                 //Static Collision
-                float dist = sqrt(pow((ball1.position.x - ball2.position.x), 2) + pow((ball1.position.y - ball2.position.y), 2));
-                float halfOverlap = 0.5 * (dist - (ball1.render.getRadius()+ball2.render.getRadius()));
+                float dist = sqrt(
+                        pow((ball1.position.x - ball2.position.x), 2) + pow((ball1.position.y - ball2.position.y), 2));
+                float halfOverlap = 0.5 * (dist - (ball1.render.getRadius() + ball2.render.getRadius()));
 
                 sf::Vector2f staticCollisionDisplacement = halfOverlap * (ball2.position - ball1.position) / dist;
                 ball1.position += staticCollisionDisplacement;
                 ball2.position -= staticCollisionDisplacement;
+                collidingPairs.push_back(std::make_pair(&ball1, &ball2));
+            }
+            for (std::pair <Ball*, Ball*> collidingBalls : collidingPairs) {
+                Ball *a = collidingBalls.first;
+                Ball *b = collidingBalls.second;
+                HandleDynamicCollision(a, b);
 
-                //Dynamic Collision
-                sf::Vector2f normal = (ball2.position-ball1.position) / dist;
-
-                sf::Vector2f tangential = sf::Vector2f(-normal.y, normal.x);
-
-                float ball1TangentialResponse = dProduct(ball1.velocity, tangential);
-                float ball2TangentialResponse = dProduct(ball2.velocity, tangential);
-
-                float ball1NormalResponse = dProduct(ball1.velocity, normal);
-                float ball2NormalResponse = dProduct(ball2.velocity, normal);
-
-                //1D conservation of momentum (elastic collision)
-                float totalMass = ball1.mass + ball2.mass;
-                float m1 = (ball1NormalResponse * (ball1.mass - ball2.mass) + 2.0f * ball2.mass * ball2NormalResponse) / totalMass;
-                float m2 = (ball2NormalResponse * (ball2.mass - ball1.mass) + 2.0f * ball1.mass * ball1NormalResponse) / totalMass;
-
-                ball1.velocity = ball1TangentialResponse * tangential + normal * m1;
-                ball2.velocity = ball2TangentialResponse * tangential + normal * m2;
             }
         }
 
@@ -163,4 +156,28 @@ int main()
     }
 
     return 0;
+}
+
+void HandleDynamicCollision(Ball *a, Ball *b) {
+    float dist = sqrt(
+            pow((a->position.x - b->position.x), 2) + pow((a->position.y - b->position.y), 2));
+
+    //Dynamic Collision
+    sf::Vector2f normal = (b->position-a->position) / dist;
+
+    sf::Vector2f tangential = sf::Vector2f(-normal.y, normal.x);
+
+    float ball1TangentialResponse = dProduct(a->velocity, tangential);
+    float ball2TangentialResponse = dProduct(b->velocity, tangential);
+
+    float ball1NormalResponse = dProduct(a->velocity, normal);
+    float ball2NormalResponse = dProduct(b->velocity, normal);
+
+    //1D conservation of momentum (elastic collision)
+    float totalMass = a->mass + b->mass;
+    float m1 = (ball1NormalResponse * (a->mass - b->mass) + 2.0f * b->mass * ball2NormalResponse) / totalMass;
+    float m2 = (ball2NormalResponse * (b->mass - a->mass) + 2.0f * a->mass * ball1NormalResponse) / totalMass;
+
+    a->velocity = ball1TangentialResponse * tangential + normal * m1;
+    b->velocity = ball2TangentialResponse * tangential + normal * m2;
 }
