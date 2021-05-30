@@ -107,12 +107,13 @@ int main()
 //        {
 //            window.draw(**it);
 //        }
-        window.draw(ball1.render);
-        window.draw(ball2.render);
-
         //todo: Imrove rendering of springs
         sf::Vertex line[] = {ball1.position, ball2.position};
         window.draw(line,2,sf::Lines);
+
+        window.draw(ball1.render);
+        window.draw(ball2.render);
+
         window.display();
     }
 
