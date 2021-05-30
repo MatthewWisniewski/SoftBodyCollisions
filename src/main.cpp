@@ -29,27 +29,28 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "WORK IN PROGRESS");
     window.setFramerateLimit(50);
-    Ball ball1 = Ball();
-    ball1.render = sf::CircleShape(50);
-    ball1.render.setOrigin(ball1.render.getRadius(), ball1.render.getRadius());
 
-    ball1.setMass(1);
+    std::vector<Ball*> balls;
 
-    ball1.setPosition(200, 50);
-    ball1.setVelocity(0, 0);
-    ball1.setUnbalancedForce(0, 0);
+    balls.push_back(new Ball());
+    balls[0]->render = sf::CircleShape(50);
+    balls[0]->render.setOrigin(50,50);
+    balls[0]->setMass(1);
+    balls[0]->setPosition(200, 50);
+    balls[0]->setVelocity(0, 0);
+    balls[0]->setUnbalancedForce(0, 0);
 
-    Ball ball2 = Ball();
-    ball2.render = sf::CircleShape(50);
-    ball2.render.setOrigin(ball2.render.getRadius(), ball2.render.getRadius());
+    balls.push_back(new Ball());
+    balls[1]->render = sf::CircleShape(50);
+    balls[1]->render.setOrigin(balls[1]->render.getRadius(), balls[1]->render.getRadius());
 
-    ball2.setMass(3);
+    balls[1]->setMass(3);
 
-    ball2.setPosition(400, 300);
-    ball2.setVelocity(0, 0);
-    ball2.setUnbalancedForce(0, 0);
+    balls[1]->setPosition(400, 300);
+    balls[1]->setVelocity(0, 0);
+    balls[1]->setUnbalancedForce(0, 0);
 
-    DampedSpring spring(&ball1, &ball2, 150, 0.1, 0.05);
+    DampedSpring spring(balls[0], balls[1], 150, 0.1, 0.05);
 
     std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
 
@@ -80,10 +81,10 @@ int main()
                 }
                 case sf::Event::MouseButtonPressed:
                 {
-                    if (inCircle(ball1.render.getRadius(), ball1.position, mousePosition)) {
-                        selected = &ball1;
-                    } else if (inCircle(ball2.render.getRadius(), ball2.position, mousePosition)) {
-                        selected = &ball2;
+                    if (inCircle(balls[0]->render.getRadius(), balls[0]->position, mousePosition)) {
+                        selected = balls[0];
+                    } else if (inCircle(balls[1]->render.getRadius(), balls[1]->position, mousePosition)) {
+                        selected = balls[1];
                     }
                     if (selected != nullptr) {
                         selected->render.setFillColor(sf::Color::Blue);
@@ -104,32 +105,32 @@ int main()
 
         if (keepGoing) {
             spring.applyForces();
-            ball1.applyGravity(sf::Vector2f(0, 9.8));
-            ball2.applyGravity(sf::Vector2f(0, 9.8));
-            ball1.applyTimeStep(0.1);
-            if (ball1.position.y + ball1.render.getRadius() >= HEIGHT) {
-                ball1.velocity.y *= -0.9;
+            balls[0]->applyGravity(sf::Vector2f(0, 9.8));
+            balls[1]->applyGravity(sf::Vector2f(0, 9.8));
+            balls[0]->applyTimeStep(0.1);
+            if (balls[0]->position.y + balls[0]->render.getRadius() >= HEIGHT) {
+                balls[0]->velocity.y *= -0.9;
             }
-            if (selected == &ball1) {
+            if (selected == balls[0]) {
                 selected->position = mousePosition;
             }
-            ball2.applyTimeStep(0.1);
-            if (ball2.position.y + ball2.render.getRadius() >= HEIGHT) {
-                ball2.velocity.y *= -0.9;
+            balls[1]->applyTimeStep(0.1);
+            if (balls[1]->position.y + balls[1]->render.getRadius() >= HEIGHT) {
+                balls[1]->velocity.y *= -0.9;
             }
-            if (selected == &ball2) {
+            if (selected == balls[1]) {
                 selected->position = mousePosition;
             }
-            if (areBallsOverlapping(&ball1, &ball2)) {
+            if (areBallsOverlapping(balls[0], balls[1])) {
                 //Static Collision
                 float dist = sqrt(
-                        pow((ball1.position.x - ball2.position.x), 2) + pow((ball1.position.y - ball2.position.y), 2));
-                float halfOverlap = 0.5 * (dist - (ball1.render.getRadius() + ball2.render.getRadius()));
+                        pow((balls[0]->position.x - balls[1]->position.x), 2) + pow((balls[0]->position.y - balls[1]->position.y), 2));
+                float halfOverlap = 0.5 * (dist - (balls[0]->render.getRadius() + balls[1]->render.getRadius()));
 
-                sf::Vector2f staticCollisionDisplacement = halfOverlap * (ball2.position - ball1.position) / dist;
-                ball1.position += staticCollisionDisplacement;
-                ball2.position -= staticCollisionDisplacement;
-                collidingPairs.push_back(std::make_pair(&ball1, &ball2));
+                sf::Vector2f staticCollisionDisplacement = halfOverlap * (balls[1]->position - balls[0]->position) / dist;
+                balls[0]->position += staticCollisionDisplacement;
+                balls[1]->position -= staticCollisionDisplacement;
+                collidingPairs.push_back(std::make_pair(balls[0], balls[1]));
             }
             for (std::pair <Ball*, Ball*> collidingBalls : collidingPairs) {
                 Ball *a = collidingBalls.first;
@@ -142,11 +143,11 @@ int main()
         window.clear();
 
         //todo: Improve rendering of springs
-        sf::Vertex line[] = {ball1.position, ball2.position};
+        sf::Vertex line[] = {balls[0]->position, balls[1]->position};
         window.draw(line,2,sf::Lines);
 
-        window.draw(ball1.render);
-        window.draw(ball2.render);
+        window.draw(balls[0]->render);
+        window.draw(balls[1]->render);
 
         window.display();
     }
