@@ -141,10 +141,6 @@ int main()
 
         window.clear();
 
-//        for(auto it=shapes.begin();it!=shapes.end();it++)
-//        {
-//            window.draw(**it);
-//        }
         //todo: Improve rendering of springs
         sf::Vertex line[] = {ball1.position, ball2.position};
         window.draw(line,2,sf::Lines);
