@@ -159,8 +159,7 @@ int main()
 }
 
 void HandleDynamicCollision(Ball *a, Ball *b) {
-    float dist = sqrt(
-            pow((a->position.x - b->position.x), 2) + pow((a->position.y - b->position.y), 2));
+    float dist = sqrt(pow((a->position.x - b->position.x), 2) + pow((a->position.y - b->position.y), 2));
 
     //Dynamic Collision
     sf::Vector2f normal = (b->position-a->position) / dist;
