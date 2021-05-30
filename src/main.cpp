@@ -47,9 +47,12 @@ int main()
 
     Ball *selected = nullptr;
 
+    sf::Vector2f mousePosition;
+
     while (window.isOpen())
     {
         sf::Event event;
+        mousePosition = (sf::Vector2f) sf::Mouse::getPosition(window);
         while (window.pollEvent(event))
         {
             switch (event.type)
@@ -67,10 +70,9 @@ int main()
                 }
                 case sf::Event::MouseButtonPressed:
                 {
-                    sf::Vector2f position = (sf::Vector2f) sf::Mouse::getPosition(window);
-                    if (inCircle(ball1.render.getRadius(), ball1.position, position)) {
+                    if (inCircle(ball1.render.getRadius(), ball1.position, mousePosition)) {
                         selected = &ball1;
-                    } else if (inCircle(ball2.render.getRadius(), ball2.position, position)) {
+                    } else if (inCircle(ball2.render.getRadius(), ball2.position, mousePosition)) {
                         selected = &ball2;
                     }
                     if (selected != nullptr) {
@@ -82,6 +84,7 @@ int main()
                 {
                     if (selected != nullptr) {
                         selected->render.setFillColor(sf::Color::White);
+                        selected = nullptr;
                     }
                 }
             }
@@ -95,9 +98,15 @@ int main()
             if (ball1.position.y + ball1.render.getRadius() >= HEIGHT) {
                 ball1.velocity.y *= -0.9;
             }
+            if (selected == &ball1) {
+                selected->position = mousePosition;
+            }
             ball2.applyTimeStep(0.1);
             if (ball2.position.y + ball2.render.getRadius() >= HEIGHT) {
                 ball2.velocity.y *= -0.9;
+            }
+            if (selected == &ball2) {
+                selected->position = mousePosition;
             }
         }
 
@@ -107,7 +116,7 @@ int main()
 //        {
 //            window.draw(**it);
 //        }
-        //todo: Imrove rendering of springs
+        //todo: Improve rendering of springs
         sf::Vertex line[] = {ball1.position, ball2.position};
         window.draw(line,2,sf::Lines);
 
