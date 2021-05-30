@@ -1,48 +1,19 @@
+#include<iostream>
+
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "ball.h"
 #include <math.h>
+
+//#include "ball.h"
+#include "DampedSpring.h"
 
 const int WIDTH = 640;
 const int HEIGHT = 480;
 
-float dotProduct(sf::Vector2f a, sf::Vector2f b) {
-    return a.x*b.x + a.y*b.y;
+
+bool inCircle(float radius, sf::Vector2f origin, sf::Vector2f point) {
+    return pow((origin.x-point.x), 2) + pow((origin.y - point.y), 2) <= radius*radius;
 }
-
-class DampedSpring {
-public:
-    float restLength;
-    float springConstant;
-    float dampingFactor;
-
-    Ball *a;
-    Ball *b;
-
-    DampedSpring(Ball *a, Ball *b, float restLength, float springConstant, float dampingFactor);
-    void applyForces();
-};
-
-DampedSpring::DampedSpring(Ball *a, Ball *b, float restLength, float springConstant, float dampingFactor) {
-    this->a = a;
-    this->b = b;
-    this->restLength = restLength;
-    this->springConstant = springConstant;
-    this->dampingFactor = dampingFactor;
-}
-
-void DampedSpring::applyForces() {
-    float absDistance = sqrt(pow(a->position.x - b->position.x, 2) + pow(a->position.y - b->position.y, 2));
-
-    float drivingForce = springConstant * (absDistance - restLength);
-    float dampingForce = dampingFactor * dotProduct(((b->position - a->position) / absDistance), (b->velocity - a->velocity));
-
-    float totalForce = drivingForce + dampingForce;
-
-    a->addForce(totalForce / absDistance * (b->position - a->position));
-    b->addForce(totalForce/absDistance * (a->position - b->position));
-}
-
 
 int main()
 {
@@ -74,6 +45,8 @@ int main()
 
     bool keepGoing = false;
 
+    Ball *selected = nullptr;
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -94,12 +67,22 @@ int main()
                 }
                 case sf::Event::MouseButtonPressed:
                 {
-                    sf::CircleShape *shape = new sf::CircleShape(50);
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                    shape->setOrigin(shape->getRadius(), shape->getRadius());
-                    shape->setPosition((float) mousePos.x, (float) mousePos.y);
-                    shape->setFillColor(sf::Color(100, 250, 50));
-                    shapes.push_back(shape);
+                    sf::Vector2f position = (sf::Vector2f) sf::Mouse::getPosition(window);
+                    if (inCircle(ball1.render.getRadius(), ball1.position, position)) {
+                        selected = &ball1;
+                    } else if (inCircle(ball2.render.getRadius(), ball2.position, position)) {
+                        selected = &ball2;
+                    }
+                    if (selected != nullptr) {
+                        selected->render.setFillColor(sf::Color::Blue);
+                    }
+                    break;
+                }
+                case sf::Event::MouseButtonReleased:
+                {
+                    if (selected != nullptr) {
+                        selected->render.setFillColor(sf::Color::White);
+                    }
                 }
             }
         }
