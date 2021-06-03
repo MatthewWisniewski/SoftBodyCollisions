@@ -6,6 +6,7 @@
 
 //#include "ball.h"
 #include "DampedSpring.h"
+#include "Wall.h"
 
 const int WIDTH = 640;
 const int HEIGHT = 480;
@@ -52,7 +53,18 @@ int main()
 
     DampedSpring spring(balls[0], balls[1], 150, 0.1, 0.05);
 
+    std::vector<Wall*> walls;
+
+    walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(0, HEIGHT)));
+    walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(WIDTH, 0)));
+    walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(0, HEIGHT)));
+    walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(WIDTH, 0)));
+
+    walls.push_back(new Wall(sf::Vector2f(100, 200), sf::Vector2f(300,100)));
+    //walls.push_back(new Wall(sf::Vector2f(0, 200), sf::Vector2f(300,200)));
+
     std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
+    std::vector<Ball*> fakeBalls;
 
     bool keepGoing = false;
 
@@ -103,19 +115,62 @@ int main()
         }
 
         collidingPairs.clear();
+        fakeBalls.clear();
 
         if (keepGoing) {
-            spring.applyForces();
+            //spring.applyForces();
             for (int i = 0; i < balls.size(); i++) {
                 balls[i]->applyGravity(sf::Vector2f(0, 9.8));
                 balls[i]->applyTimeStep(0.1);
-                if (balls[i]->position.y + balls[i]->render.getRadius() >= HEIGHT) {
-                    balls[i]->velocity.y *= -0.9;
-                }
+//                if (balls[i]->position.y + balls[i]->render.getRadius() >= HEIGHT) {
+//                    balls[i]->velocity.y *= -0.9;
+//                }
                 if (selected == balls[i]) {
                     selected->position = mousePosition;
                 }
             }
+
+            //Wall Collisions
+
+            for (int i = 0; i < balls.size(); i++) {
+                for (int j = 0; j < walls.size(); j++) {
+                    //Identify the point on walls[j] that is closest to the position of balls[i]
+
+                    float t = dProduct((walls[j]->endPos - walls[j]->startPos), balls[i]->position - walls[j]->startPos) / (walls[j]->length* walls[j]->length);
+
+                    std::cout << t << std::endl;
+
+                    t = std::max(0.0f, std::min(1.0f, t));
+
+                    //float t = std::max(0.0f, std::min(1.0f, dProduct((walls[j]->endPos - walls[j]->startPos), (balls[i]->position - walls[j]->startPos))/walls[j]->length));
+
+                    sf::Vector2f closestPoint = walls[j]->startPos + t * (walls[j]->endPos-walls[j]->startPos);
+
+                    //Handle static collision and set up to handle dynamic collision
+
+                    std::cout << closestPoint.x << " " << closestPoint.y << std::endl;
+
+                    if (inCircle(balls[i]->render.getRadius(), balls[i]->position, closestPoint)) {
+                        std::cout << "HELLO" << std::endl;
+                        Ball fakeBall = Ball();
+                        fakeBall.render = sf::CircleShape(0.5);
+                        fakeBall.render.setOrigin(0.25, 0.25);
+                        fakeBall.setMass(100 * balls[i]->mass);
+                        fakeBall.setPosition(closestPoint.x, closestPoint.y);
+                        fakeBall.setVelocity(0, 0);
+                        fakeBall.setUnbalancedForce(0, 0);
+
+                        fakeBalls.push_back(&fakeBall);
+                        collidingPairs.push_back(std::make_pair(balls[i], &fakeBall));
+
+                        float centerToWallDistance = sqrt(pow((balls[i]->position.x - closestPoint.x), 2) +  pow((balls[i]->position.y - closestPoint.y), 2));
+                        float overlap = centerToWallDistance - balls[i]->render.getRadius() - fakeBall.render.getRadius();
+
+                        balls[i]->position -= overlap / centerToWallDistance * (balls[i]->position - fakeBall.position);
+                    }
+                }
+            }
+
             //Static Collisions
             for (int i = 0; i < balls.size(); i++) {
                 for (int j = i+1; j < balls.size(); j++) {
@@ -135,6 +190,10 @@ int main()
         }
 
         window.clear();
+
+        for (int i = 0; i < walls.size(); i++) {
+            walls[i]->renderWall(&window);
+        }
 
         //todo: Improve rendering of springs
         sf::Vertex line[] = {balls[0]->position, balls[1]->position};
@@ -179,4 +238,7 @@ void handleDynamicCollision(Ball *a, Ball *b) {
 
     a->velocity = ball1TangentialResponse * tangential + normal * m1;
     b->velocity = ball2TangentialResponse * tangential + normal * m2;
+
+//    a->velocity *= 0.995f;
+//    b->velocity *= 0.995f;
 }
