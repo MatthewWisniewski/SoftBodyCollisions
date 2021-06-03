@@ -6,6 +6,19 @@
 #include <SFML/Graphics.hpp>
 #include "ball.h"
 
+Ball::Ball(float radius, float mass, sf::Vector2f position) {
+    this->radius = radius;
+    this->mass = mass;
+    this->position = position;
+
+    setVelocity(0.0f, 0.0f);
+    setUnbalancedForce(0.0f, 0.0f);
+
+    render = sf::CircleShape(radius);
+    render.setOrigin(radius, radius);
+    render.setPosition(position);
+}
+
 void Ball :: setPosition(float x, float y) {
     position = sf::Vector2f(x, y);
     render.setPosition(position);
@@ -34,7 +47,11 @@ void Ball :: setMass(float mass) {
 void Ball :: applyTimeStep(float deltaTime) {
     sf::Vector2f acceleration = unbalancedForce / mass;
     velocity += acceleration * deltaTime;
-    position += velocity * deltaTime;
-    render.setPosition(position);
+
+    if (velocity.x * velocity.x + velocity.y * velocity.y > 0.5f) {
+        position += velocity * deltaTime;
+        render.setPosition(position);
+    }
+
     setUnbalancedForce(0,0);
 }

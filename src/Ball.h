@@ -7,9 +7,12 @@ public:
     sf::Vector2f velocity;
     sf::Vector2f unbalancedForce;
 
+    float radius;
     float mass;
 
     sf::CircleShape render;
+
+    Ball(float radius, float mass, sf::Vector2f position);
 
     void applyTimeStep(float deltaTime);
 
