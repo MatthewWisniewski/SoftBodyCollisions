@@ -57,7 +57,7 @@ int main()
     walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(0, HEIGHT)));
     walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(WIDTH, 0)));
 
-    walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(250,200)));
+    walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(250,300)));
     //walls.push_back(new Wall(sf::Vector2f(0, 200), sf::Vector2f(300,200)));
 
     std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
@@ -91,25 +91,25 @@ int main()
             if (col != NUM_COLS - 1) {
                 Ball *a = balls[startingIndex + row * NUM_COLS + col];
                 Ball *b = balls[startingIndex + row * NUM_COLS + col + 1];
-                springs.push_back(new DampedSpring(a, b, 50, 1.8, 0.05));
+                springs.push_back(new DampedSpring(a, b, 50, 1.8, 1));
             }
             // Vertical springs
             if (row != NUM_ROWS - 1) {
                 Ball *a = balls[startingIndex + row * NUM_COLS + col];
                 Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col];
-                springs.push_back(new DampedSpring(a, b, 50, 1.8, 0.05));
+                springs.push_back(new DampedSpring(a, b, 50, 1.8, 1));
             }
 
             // Diagonal Springs
             if  (col != NUM_COLS - 1 && row != NUM_ROWS - 1) {
                 Ball *a = balls[startingIndex + row * NUM_COLS + col];
                 Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col+1];
-                springs.push_back(new DampedSpring(a, b, 70, 3.6, 0.05));
+                springs.push_back(new DampedSpring(a, b, 70, 3.6, 1));
             }
             if  (col != 0 && row != NUM_ROWS - 1) {
                 Ball *a = balls[startingIndex + row * NUM_COLS + col];
                 Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col - 1];
-                springs.push_back(new DampedSpring(a, b, 70, 3.6, 0.05));
+                springs.push_back(new DampedSpring(a, b, 70, 3.6, 1));
             }
         }
     }
