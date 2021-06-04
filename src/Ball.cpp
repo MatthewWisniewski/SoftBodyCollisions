@@ -45,10 +45,10 @@ void Ball :: setMass(float mass) {
 }
 
 void Ball :: applyTimeStep(float deltaTime) {
-    sf::Vector2f acceleration = unbalancedForce / mass;
+    sf::Vector2f acceleration = -velocity * 0.99f + unbalancedForce / mass;
     velocity += acceleration * deltaTime;
 
-    if (velocity.x * velocity.x + velocity.y * velocity.y > 0.5f) {
+    if (velocity.x * velocity.x + velocity.y * velocity.y > 0.01f) {
         position += velocity * deltaTime;
         render.setPosition(position);
     }

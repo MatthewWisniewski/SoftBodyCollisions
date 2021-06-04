@@ -41,21 +41,23 @@ int main()
 //    balls.push_back(new Ball(50 , 1, sf::Vector2f(200,50)));
 //
 //    balls.push_back(new Ball(50, 1, sf::Vector2f(400,300)));
+//
+//    for (int i = 0; i < 15; i++) {
+//        balls.push_back(new Ball(rand() % 50 + 15, rand() % 15 + 1, sf::Vector2f(rand() % WIDTH, rand() % HEIGHT)));
+//    }
 
-    for (int i = 0; i < 15; i++) {
-        balls.push_back(new Ball(rand() % 50 + 15, rand() % 15 + 1, sf::Vector2f(rand() % WIDTH, rand() % HEIGHT)));
-    }
-
-    DampedSpring spring(balls[0], balls[1], 150, 0.1, 0.05);
-
+    std::vector<DampedSpring*> springs;
     std::vector<Wall*> walls;
+
+    //DampedSpring spring(balls[0], balls[1], 150, 0.1, 0.05);
+    //springs.push_back(&spring);
 
     walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(0, HEIGHT)));
     walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(WIDTH, 0)));
     walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(0, HEIGHT)));
     walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(WIDTH, 0)));
 
-    walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(300,100)));
+    walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(250,200)));
     //walls.push_back(new Wall(sf::Vector2f(0, 200), sf::Vector2f(300,200)));
 
     std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
@@ -66,6 +68,52 @@ int main()
     Ball *selected = nullptr;
 
     sf::Vector2f mousePosition;
+
+    //Build Soft body
+
+    int startingIndex = balls.size();
+
+    int NUM_ROWS = 3;
+    int NUM_COLS = 5;
+
+    //Initialise balls
+    for (int row = 0; row < NUM_ROWS; row++) {
+        for (int col = 0; col < NUM_COLS; col++) {
+            sf::Vector2f position = sf::Vector2f(200+col*50, 50+row*50);
+            balls.push_back(new Ball(20, 1, position));
+        }
+    }
+
+    //Initialise Damped Springs
+    for (int row = 0; row < NUM_ROWS; row++) {
+        for (int col = 0; col < NUM_COLS; col++) {
+            // Horizontal springs
+            if (col != NUM_COLS - 1) {
+                Ball *a = balls[startingIndex + row * NUM_COLS + col];
+                Ball *b = balls[startingIndex + row * NUM_COLS + col + 1];
+                springs.push_back(new DampedSpring(a, b, 50, 1.8, 0.05));
+            }
+            // Vertical springs
+            if (row != NUM_ROWS - 1) {
+                Ball *a = balls[startingIndex + row * NUM_COLS + col];
+                Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col];
+                springs.push_back(new DampedSpring(a, b, 50, 1.8, 0.05));
+            }
+
+            // Diagonal Springs
+            if  (col != NUM_COLS - 1 && row != NUM_ROWS - 1) {
+                Ball *a = balls[startingIndex + row * NUM_COLS + col];
+                Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col+1];
+                springs.push_back(new DampedSpring(a, b, 70, 3.6, 0.05));
+            }
+            if  (col != 0 && row != NUM_ROWS - 1) {
+                Ball *a = balls[startingIndex + row * NUM_COLS + col];
+                Ball *b = balls[startingIndex + (row + 1) * NUM_COLS + col - 1];
+                springs.push_back(new DampedSpring(a, b, 70, 3.6, 0.05));
+            }
+        }
+    }
+
 
     while (window.isOpen())
     {
@@ -115,16 +163,19 @@ int main()
         if (keepGoing) {
             for (int increment = 0; increment < updatesPerFrame; increment++) {
 
-                spring.applyForces();
+
                 for (int i = 0; i < balls.size(); i++) {
-                    balls[i]->applyGravity(sf::Vector2f(0, 9.8));
                     balls[i]->applyTimeStep(TIME_PER_FRAME / updatesPerFrame);
+                    balls[i]->applyGravity(sf::Vector2f(0, 9.8));
 //                if (balls[i]->position.y + balls[i]->radius >= HEIGHT) {
 //                    balls[i]->velocity.y *= -0.9;
 //                }
                     if (selected == balls[i]) {
                         selected->position = mousePosition;
                     }
+                }
+                for (int i = 0; i < springs.size(); i++) {
+                    springs[i]->applyForces();
                 }
 
                 //Wall Collisions
@@ -142,7 +193,7 @@ int main()
                         //Handle static collision and set up to handle dynamic collision
 
                         if (inCircle(balls[i]->radius, balls[i]->position, closestPoint)) {
-                            Ball fakeBall = Ball(0.5, 1000 * balls[i]->mass, closestPoint);
+                            Ball fakeBall = Ball(0.5, 1000000 * balls[i]->mass, closestPoint);
 
                             fakeBalls.push_back(&fakeBall);
                             collidingPairs.push_back(std::make_pair(balls[i], &fakeBall));
@@ -183,8 +234,10 @@ int main()
         }
 
         //todo: Improve rendering of springs
-        sf::Vertex line[] = {balls[0]->position, balls[1]->position};
-        window.draw(line,2,sf::Lines);
+        for (int i = 0; i < springs.size(); i ++) {
+            sf::Vertex line[] = {springs[i]->a->position, springs[i]->b->position};
+            window.draw(line,2,sf::Lines);
+        }
 
         for (int i = 0; i < balls.size(); i++) {
             window.draw(balls[i]->render);
