@@ -1,5 +1,4 @@
-#include <math.h>
-#include <iostream>
+#include <cmath>
 #include "Ray.h"
 
 //TODO: direction should always have magnitude greater than 0
