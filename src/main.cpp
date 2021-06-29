@@ -235,15 +235,15 @@ int main()
 
         //RAY EXPERIMENTATION
         ray.resetDestination();
-        sf::Vector2f deltaFromRay = mousePosition - ray.origin;
+        sf::Vector2f deltaFromRay = mousePosition - ray.getOrigin();
         sf::Vector2f normalisedDeltaFromRay = deltaFromRay /
                                               sqrt(deltaFromRay.x * deltaFromRay.x + deltaFromRay.y * deltaFromRay.y);
-        ray.direction = normalisedDeltaFromRay;
+        ray.setDirection(normalisedDeltaFromRay);
 
         for (int i = 0; i < walls.size(); i++) {
             ray.updateNearestIntersection(walls[i]);
         }
-        if (ray.intersected) {
+        if (ray.hasDestination()) {
             ray.render(&window);
         }
 

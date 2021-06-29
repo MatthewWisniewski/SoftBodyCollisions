@@ -78,3 +78,33 @@ void Ray::render(sf::RenderWindow *window) {
         window->draw(destRender);
     }
 }
+
+sf::Vector2f Ray::getOrigin() {
+    return origin;
+}
+
+void Ray::setOrigin(sf::Vector2f origin) {
+    this->origin = origin;
+    intersected = false;
+}
+
+sf::Vector2f Ray::getDestination() {
+    return destination;
+}
+
+void Ray::setDestination(sf::Vector2f destination) {
+    this->destination = destination;
+    intersected = false;
+}
+
+sf::Vector2f Ray::getDirection() {
+    return direction;
+}
+void Ray::setDirection(sf::Vector2f direction) {
+    this->direction = direction;
+    intersected = false;
+}
+
+bool Ray::hasDestination() {
+    return intersected;
+}
