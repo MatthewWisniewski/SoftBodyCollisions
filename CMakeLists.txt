@@ -4,7 +4,7 @@ project(sfml_pendulumPhysics)
 set(CMAKE_CXX_STANDARD 14)
 
 
-set(SOURCES src/Ball.cpp src/main.cpp src/DampedSpring.cpp src/DampedSpring.h src/Wall.cpp src/Wall.h)
+set(SOURCES src/Ball.cpp src/main.cpp src/DampedSpring.cpp src/DampedSpring.h src/Wall.cpp src/Wall.h src/Ray.cpp src/Ray.h)
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "a")
 

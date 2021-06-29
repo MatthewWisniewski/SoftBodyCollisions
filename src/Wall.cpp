@@ -6,7 +6,12 @@
 Wall::Wall(sf::Vector2f startPos, sf::Vector2f endPos) {
     this->startPos = startPos;
     this->endPos = endPos;
+    this->normalisedVector = endPos - startPos;
     calculateLength();
+}
+
+sf::Vector2f Wall::getVectorForm() {
+    return normalisedVector * length;
 }
 
 void Wall::calculateLength() {

@@ -7,7 +7,7 @@
 
 //#include "ball.h"
 #include "DampedSpring.h"
-#include "Wall.h"
+#include "Ray.h"
 
 const int WIDTH = 640;
 const int HEIGHT = 480;
@@ -114,6 +114,9 @@ int main()
         }
     }
 
+    //RAY EXPERIMENTATION
+
+    Ray ray = Ray(sf::Vector2f(300, 150), sf::Vector2f(1,1));
 
     while (window.isOpen())
     {
@@ -227,7 +230,22 @@ int main()
             }
         }
 
+
         window.clear();
+
+        //RAY EXPERIMENTATION
+        ray.resetDestination();
+        sf::Vector2f deltaFromRay = mousePosition - ray.origin;
+        sf::Vector2f normalisedDeltaFromRay = deltaFromRay /
+                                              sqrt(deltaFromRay.x * deltaFromRay.x + deltaFromRay.y * deltaFromRay.y);
+        ray.direction = normalisedDeltaFromRay;
+
+        for (int i = 0; i < walls.size(); i++) {
+            ray.updateNearestIntersection(walls[i]);
+        }
+        if (ray.intersected) {
+            ray.render(&window);
+        }
 
         for (int i = 0; i < walls.size(); i++) {
             walls[i]->renderWall(&window);
