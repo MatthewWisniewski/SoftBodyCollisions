@@ -1,7 +1,6 @@
 #include<iostream>
 
 #include <SFML/Graphics.hpp>
-#include <vector>
 #include <math.h>
 
 //#include "ball.h"
