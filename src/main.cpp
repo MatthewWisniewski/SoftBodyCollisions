@@ -54,10 +54,10 @@ int main()
     //DampedSpring spring(balls[0], balls[1], 150, 0.1, 0.05);
     //springs.push_back(&spring);
 
-    walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(0, HEIGHT)));
-    walls.push_back(new Wall(sf::Vector2f(0, 0), sf::Vector2f(WIDTH, 0)));
-    walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(0, HEIGHT)));
-    walls.push_back(new Wall(sf::Vector2f(WIDTH, HEIGHT), sf::Vector2f(WIDTH, 0)));
+    walls.push_back(WallFactory(0, 0, 0, HEIGHT));
+    walls.push_back(WallFactory(0, 0, WIDTH, 0));
+    walls.push_back(WallFactory(WIDTH, HEIGHT, 0, HEIGHT));
+    walls.push_back(WallFactory(WIDTH, HEIGHT, WIDTH, 0));
 
     walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(250,300)));
     //walls.push_back(new Wall(sf::Vector2f(0, 200), sf::Vector2f(300,200)));
