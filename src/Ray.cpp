@@ -58,11 +58,6 @@ void Ray::resetDestination() {
 void Ray::render(sf::RenderWindow *window) {
     if (intersected) {
 
-        sf::CircleShape originRender(4);
-        originRender.setOrigin(4, 4);
-        originRender.setPosition(origin.x, origin.y);
-        originRender.setFillColor(sf::Color::Red);
-
         sf::CircleShape destRender(4);
         destRender.setOrigin(4, 4);
         destRender.setPosition(destination.x, destination.y);
@@ -73,7 +68,6 @@ void Ray::render(sf::RenderWindow *window) {
         line[1].color = sf::Color::Red;
         window->draw(line, 2, sf::Lines);
 
-        window->draw(originRender);
         window->draw(destRender);
     }
 }

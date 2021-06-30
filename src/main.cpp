@@ -5,7 +5,9 @@
 
 //#include "ball.h"
 #include "DampedSpring.h"
-#include "Ray.h"
+#include "RayCaster.h"
+
+#define PI 3.14159
 
 const int WIDTH = 640;
 const int HEIGHT = 480;
@@ -115,6 +117,16 @@ int main()
     //RAY EXPERIMENTATION
 
     Ray ray = Ray(sf::Vector2f(300, 150), sf::Vector2f(1,1));
+
+    //RayCaster Experimentation
+    RayCaster caster = RayCaster(sf::Vector2f(250,250), walls);
+
+    int NUMBER_OF_RAYS = 25;
+
+    for (int i = 0; i < NUMBER_OF_RAYS; i++) {
+        sf::Vector2f rotatedUnitVector(cos(i * 2*PI / NUMBER_OF_RAYS), sin(i * 2* PI / NUMBER_OF_RAYS));
+        caster.addRayInDirection(rotatedUnitVector);
+    }
 
     while (window.isOpen())
     {
@@ -232,18 +244,22 @@ int main()
         window.clear();
 
         //RAY EXPERIMENTATION
-        ray.resetDestination();
-        sf::Vector2f deltaFromRay = mousePosition - ray.getOrigin();
-        sf::Vector2f normalisedDeltaFromRay = deltaFromRay /
-                                              sqrt(deltaFromRay.x * deltaFromRay.x + deltaFromRay.y * deltaFromRay.y);
-        ray.setDirection(normalisedDeltaFromRay);
+//        ray.resetDestination();
+//        sf::Vector2f deltaFromRay = mousePosition - ray.getOrigin();
+//        sf::Vector2f normalisedDeltaFromRay = deltaFromRay /
+//                                              sqrt(deltaFromRay.x * deltaFromRay.x + deltaFromRay.y * deltaFromRay.y);
+//        ray.setDirection(normalisedDeltaFromRay);
+//
+//        for (int i = 0; i < walls.size(); i++) {
+//            ray.updateNearestIntersection(walls[i]);
+//        }
+//        if (ray.hasDestination()) {
+//            ray.render(&window);
+//        }
 
-        for (int i = 0; i < walls.size(); i++) {
-            ray.updateNearestIntersection(walls[i]);
-        }
-        if (ray.hasDestination()) {
-            ray.render(&window);
-        }
+        //Ray Casting Experimentation
+        caster.setPosition(mousePosition);
+        caster.render(&window);
 
         for (int i = 0; i < walls.size(); i++) {
             walls[i]->renderWall(&window);
