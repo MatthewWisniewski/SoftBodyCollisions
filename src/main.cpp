@@ -7,6 +7,8 @@
 #include "DampedSpring.h"
 #include "RayCaster.h"
 
+#include "WallFactory.h"
+
 #define PI 3.14159
 
 const int WIDTH = 640;
@@ -59,6 +61,10 @@ int main()
 
     walls.push_back(new Wall(sf::Vector2f(50, 200), sf::Vector2f(250,300)));
     //walls.push_back(new Wall(sf::Vector2f(0, 200), sf::Vector2f(300,200)));
+
+    //FOR RAYCASTING
+    walls.push_back(WallFactory(450, 100, 600, 300));
+    walls.push_back(WallFactory(300, 300, 450, 150));
 
     std::vector<std::pair<Ball*, Ball*>> collidingPairs ;
     std::vector<Ball*> fakeBalls;
@@ -266,14 +272,14 @@ int main()
         }
 
         //todo: Improve rendering of springs
-        for (int i = 0; i < springs.size(); i ++) {
-            sf::Vertex line[] = {springs[i]->a->position, springs[i]->b->position};
-            window.draw(line,2,sf::Lines);
-        }
-
-        for (int i = 0; i < balls.size(); i++) {
-            window.draw(balls[i]->render);
-        }
+//        for (int i = 0; i < springs.size(); i ++) {
+//            sf::Vertex line[] = {springs[i]->a->position, springs[i]->b->position};
+//            window.draw(line,2,sf::Lines);
+//        }
+//
+//        for (int i = 0; i < balls.size(); i++) {
+//            window.draw(balls[i]->render);
+//        }
 
         window.display();
     }
