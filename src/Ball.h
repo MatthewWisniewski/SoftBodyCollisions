@@ -1,3 +1,6 @@
+#ifndef BALL_H
+#define BALL_H
+
 #include <vector>
 #include <SFML/Graphics.hpp>
 
@@ -24,3 +27,5 @@ public:
 
     void applyGravity(sf::Vector2f g);
 };
+
+#endif //BALL_H

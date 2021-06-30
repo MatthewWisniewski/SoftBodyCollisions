@@ -1,3 +1,6 @@
+#ifndef WALL_H
+#define WALL_H
+
 #include <SFML/Graphics.hpp>
 
 class Wall {
@@ -17,4 +20,6 @@ class Wall {
     private:
         void calculateLength();
 };
+
+#endif //WALL_H
 

@@ -1,3 +1,6 @@
+#ifndef RAYCASTER_H
+#define RAYCASTER_H
+
 #include "Ray.h"
 
 class RayCaster {
@@ -17,4 +20,6 @@ class RayCaster {
         sf::Vector2f getPosition();
         void setPosition(sf::Vector2f newPosition);
 };
+
+#endif //RAYCASTER_H
 

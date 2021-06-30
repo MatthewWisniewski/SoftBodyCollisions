@@ -1,3 +1,6 @@
+#ifndef RAY_H
+#define RAY_H
+
 #include <SFML/Graphics.hpp>
 #include "Wall.h"
 
@@ -30,4 +33,6 @@ class Ray {
 
         bool hasDestination();
 };
+
+#endif //RAY_H
 

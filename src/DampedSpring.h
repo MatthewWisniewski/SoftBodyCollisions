@@ -1,3 +1,6 @@
+#ifndef DAMPEDSPRING_H
+#define DAMPEDSPRING_H
+
 #include "ball.h"
 
 class DampedSpring {
@@ -12,3 +15,5 @@ public:
     DampedSpring(Ball *a, Ball *b, float restLength, float springConstant, float dampingFactor);
     void applyForces();
 };
+
+#endif //DAMPEDSPRING_H
